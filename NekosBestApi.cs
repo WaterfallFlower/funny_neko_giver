@@ -12,44 +12,39 @@ using Newtonsoft.Json.Linq;
 
 namespace funny_neko_giver
 {
-    public class CategoryImage
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
-
-        public override string ToString()
-        {
-            return $"{Name} ({Type})";
-        }
-    }
-
-    public class FileDescription
+    internal class FileDescription
     {
         [JsonProperty("artist_href")] public string ArtistHref { get; set; }
         [JsonProperty("artist_name")] public string ArtistName { get; set; }
         [JsonProperty("source_url")] public string SourceUrl { get; set; }
         [JsonProperty("url")] public string Url { get; set; }
-
-        [JsonIgnore] public Image ImageItself { get; set; }
-        [JsonIgnore] public string DescriptionName { get; set; }
-
-        public override string ToString()
-        {
-            return DescriptionName;
-        }
     }
 
-    public class ResultsFileDescription
+    internal class ResultsFileDescription
     {
         [JsonProperty("results")] public IEnumerable<FileDescription> Results;
     }
+    
+    public class NekosBestApiProvider : ImageApiDescription {
 
-    public class NekoAccess
+        public NekosBestApiProvider()
+        {
+            Name = "NEKOS.BEST (v2)";
+            UrlSimple = "https://nekos.best/";
+        }
+        
+        public override IImageProviderApi CreateInstance()
+        {
+            return new NekosBestApi();
+        }
+    }
+
+    public class NekosBestApi : IImageProviderApi
     {
         private readonly HttpClient _localHttpClient = new HttpClient();
         private IEnumerable<CategoryImage> _categoryList;
 
-        public async void Init(Action<string> onError, Action<NekoAccess> onSuccess)
+        public async void Init(Action<string> onError, Action<IImageProviderApi> onSuccess)
         {
             var cancelOperation = new CancellationTokenSource();
             _categoryList = await BuildCategoryList(cancelOperation);
@@ -65,7 +60,7 @@ namespace funny_neko_giver
 
         public async void LoadCategoryImage(
             CategoryImage category, int amount,
-            Action<string> onError, Action<FileDescription> onSuccess,
+            Action<string> onError, Action<ResultImage> onSuccess,
             Action<string> doProgress, Action onFinal
         )
         {
@@ -86,26 +81,31 @@ namespace funny_neko_giver
             {
                 doProgress(string.Format(Resources.progress_downloadimage, i, k));
                 i++;
-                
+
                 /* Description Name */
                 var idx = description.Url.LastIndexOf('/');
-                description.DescriptionName =
-                    idx != -1 ? description.Url.Substring(idx + 1).Split('.')[0] : description.Url;
+                var imageName =idx != -1 ? description.Url.Substring(idx + 1).Split('.')[0] : description.Url;
+                Image imageItself = null;
 
                 var response = await _localHttpClient.GetAsync(description.Url);
                 if (response.IsSuccessStatusCode)
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
-                        description.ImageItself = Image.FromStream(stream);
+                        imageItself = Image.FromStream(stream);
                     }
                 }
                 else
                 {
                     onError(Resources.error_downloadimage);
                 }
-
-                onSuccess(description);
+                
+                onSuccess(new ResultImage
+                {
+                    ImageName = imageName,
+                    ImageItself = imageItself,
+                    FormattedDescription = string.Format(Resources.result_search_filled, description.ArtistName, description.ArtistName,description.SourceUrl)
+                });
             }
 
             onFinal();

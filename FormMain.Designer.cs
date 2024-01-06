@@ -32,6 +32,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.buttonLoad = new System.Windows.Forms.Button();
             this.groupBoxMain = new System.Windows.Forms.GroupBox();
+            this.listAvailableApi = new System.Windows.Forms.ComboBox();
+            this.labelCurrentApi = new System.Windows.Forms.Label();
             this.groupBoxProgress = new System.Windows.Forms.GroupBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.groupBoxDescription = new System.Windows.Forms.GroupBox();
@@ -60,7 +62,7 @@
             // 
             // buttonLoad
             // 
-            this.buttonLoad.Location = new System.Drawing.Point(168, 21);
+            this.buttonLoad.Location = new System.Drawing.Point(165, 45);
             this.buttonLoad.Name = "buttonLoad";
             this.buttonLoad.Size = new System.Drawing.Size(75, 23);
             this.buttonLoad.TabIndex = 0;
@@ -71,6 +73,8 @@
             // groupBoxMain
             // 
             this.groupBoxMain.AutoSize = true;
+            this.groupBoxMain.Controls.Add(this.listAvailableApi);
+            this.groupBoxMain.Controls.Add(this.labelCurrentApi);
             this.groupBoxMain.Controls.Add(this.groupBoxProgress);
             this.groupBoxMain.Controls.Add(this.groupBoxDescription);
             this.groupBoxMain.Controls.Add(this.buttonDeleteAll);
@@ -87,6 +91,23 @@
             this.groupBoxMain.TabIndex = 1;
             this.groupBoxMain.TabStop = false;
             this.groupBoxMain.Text = "Configure";
+            // 
+            // listAvailableApi
+            // 
+            this.listAvailableApi.FormattingEnabled = true;
+            this.listAvailableApi.Location = new System.Drawing.Point(76, 18);
+            this.listAvailableApi.Name = "listAvailableApi";
+            this.listAvailableApi.Size = new System.Drawing.Size(161, 21);
+            this.listAvailableApi.TabIndex = 10;
+            // 
+            // labelCurrentApi
+            // 
+            this.labelCurrentApi.AutoSize = true;
+            this.labelCurrentApi.Location = new System.Drawing.Point(9, 21);
+            this.labelCurrentApi.Name = "labelCurrentApi";
+            this.labelCurrentApi.Size = new System.Drawing.Size(64, 13);
+            this.labelCurrentApi.TabIndex = 9;
+            this.labelCurrentApi.Text = "Current API:";
             // 
             // groupBoxProgress
             // 
@@ -150,16 +171,16 @@
             // listFilesLoaded
             // 
             this.listFilesLoaded.FormattingEnabled = true;
-            this.listFilesLoaded.Location = new System.Drawing.Point(6, 76);
+            this.listFilesLoaded.Location = new System.Drawing.Point(6, 100);
             this.listFilesLoaded.Name = "listFilesLoaded";
-            this.listFilesLoaded.Size = new System.Drawing.Size(237, 147);
+            this.listFilesLoaded.Size = new System.Drawing.Size(237, 121);
             this.listFilesLoaded.TabIndex = 4;
             this.listFilesLoaded.SelectedIndexChanged += new System.EventHandler(this.OnComboBoxIndexChange);
             // 
             // labelAmount
             // 
             this.labelAmount.AutoSize = true;
-            this.labelAmount.Location = new System.Drawing.Point(6, 52);
+            this.labelAmount.Location = new System.Drawing.Point(6, 76);
             this.labelAmount.Name = "labelAmount";
             this.labelAmount.Size = new System.Drawing.Size(46, 13);
             this.labelAmount.TabIndex = 3;
@@ -167,7 +188,7 @@
             // 
             // numAmount
             // 
-            this.numAmount.Location = new System.Drawing.Point(58, 50);
+            this.numAmount.Location = new System.Drawing.Point(58, 74);
             this.numAmount.Maximum = new decimal(new int[] { 64, 0, 0, 0 });
             this.numAmount.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             this.numAmount.Name = "numAmount";
@@ -178,7 +199,7 @@
             // listCategory
             // 
             this.listCategory.FormattingEnabled = true;
-            this.listCategory.Location = new System.Drawing.Point(6, 23);
+            this.listCategory.Location = new System.Drawing.Point(6, 45);
             this.listCategory.Name = "listCategory";
             this.listCategory.Size = new System.Drawing.Size(156, 21);
             this.listCategory.TabIndex = 1;
@@ -239,7 +260,7 @@
             // 
             this.actionButtonLoad.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.actionButtonLoad.Name = "actionButtonLoad";
-            this.actionButtonLoad.Size = new System.Drawing.Size(152, 22);
+            this.actionButtonLoad.Size = new System.Drawing.Size(100, 22);
             this.actionButtonLoad.Text = "Load";
             this.actionButtonLoad.Click += new System.EventHandler(this.OnLoadButtonClick);
             // 
@@ -269,6 +290,10 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.ComboBox listAvailableApi;
+
+        private System.Windows.Forms.Label labelCurrentApi;
 
         private System.Windows.Forms.ToolStripMenuItem actionButtonLoad;
 

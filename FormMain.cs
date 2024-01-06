@@ -6,7 +6,7 @@ namespace funny_neko_giver
 {
     public partial class FormMain : Form
     {
-        private NekoAccess _apiInstance;
+        private IImageProviderApi _apiInstance;
 
         public FormMain()
         {
@@ -33,29 +33,20 @@ namespace funny_neko_giver
             groupBoxProgress.Text = Resources.progress_completed;
         }
 
-        private void OnFormLoad(object sender, EventArgs e)
+        private void CallNewApi()
         {
-            progressBar.Value = 0;
-            progressBar.Maximum = 0;
-            progressBar.Step = 1;
-            
-            groupBoxProgress.Text = Resources.progress_notasksrunning;
-            groupBoxDescription.Text = Resources.form_file_description;
-            groupBoxMain.Text = Resources.form_configure;
-            buttonLoad.Text = Resources.form_button_load;
-            labelAmount.Text = Resources.form_label_amount;
-            buttonDeleteAll.Text = Resources.form_button_deleteall;
-            buttonDownloadAll.Text = Resources.form_button_downloadall;
-            toolMenuMain.Text = Resources.form_tool_strip_main;
-            actionButtonLoad.Text = Resources.form_button_load;
-            
+            listCategory.Items.Clear();
 
-            _apiInstance = new NekoAccess();
+            var access1 = listAvailableApi.SelectedItem as ImageApiDescription;
+            
+            _apiInstance = access1.CreateInstance();
             _apiInstance.Init(
                 stringError =>
                 {
-                    MessageBox.Show(string.Format(Resources.error_connectapi, stringError), Resources.dialog_messages_error, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    MessageBox.Show(
+                        string.Format(Resources.error_connectapi, stringError), Resources.dialog_messages_error,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error
+                    );
                     buttonLoad.Enabled = listCategory.Enabled = false;
                 },
                 instance =>
@@ -67,22 +58,49 @@ namespace funny_neko_giver
                 });
         }
 
+        private void OnFormLoad(object sender, EventArgs e)
+        {
+            /* Filling and configuring API list */
+            listAvailableApi.Items.Add(new NekosBestApiProvider());
+            listAvailableApi.SelectedIndex = 0;
+            
+            /* Setting up the progress bar */
+            progressBar.Value = 0;
+            progressBar.Maximum = 0;
+            progressBar.Step = 1;
+
+            /* Localization */
+            groupBoxProgress.Text = Resources.progress_notasksrunning;
+            groupBoxDescription.Text = Resources.form_file_description;
+            groupBoxMain.Text = Resources.form_configure;
+            buttonLoad.Text = Resources.form_button_load;
+            labelAmount.Text = Resources.form_label_amount;
+            buttonDeleteAll.Text = Resources.form_button_deleteall;
+            buttonDownloadAll.Text = Resources.form_button_downloadall;
+            toolMenuMain.Text = Resources.form_tool_strip_main;
+            actionButtonLoad.Text = Resources.form_button_load;
+            
+            CallNewApi();
+        }
+
         private void OnLoadButtonClick(object sender, EventArgs e)
         {
             if (listCategory.SelectedIndex >= 0)
             {
                 SetProgressMaxValue(2 + (int)numAmount.Value);
-                buttonLoad.Enabled = numAmount.Enabled = false;
+                buttonLoad.Enabled = numAmount.Enabled = listAvailableApi.Enabled = false;
                 _apiInstance.LoadCategoryImage(listCategory.SelectedItem as CategoryImage, (int)numAmount.Value,
                     stringError =>
                     {
-                        buttonLoad.Enabled = numAmount.Enabled = true;
-                        MessageBox.Show(string.Format(Resources.error_connectapi, stringError), Resources.dialog_messages_error, MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        buttonLoad.Enabled = numAmount.Enabled = listAvailableApi.Enabled = true;
+                        MessageBox.Show(
+                            string.Format(Resources.error_connectapi, new object[]{stringError}), Resources.dialog_messages_error,
+                            MessageBoxButtons.OK, MessageBoxIcon.Error
+                        );
                     },
                     obtainedFile =>
                     {
-                        buttonLoad.Enabled = numAmount.Enabled = true;
+                        buttonLoad.Enabled = numAmount.Enabled = listAvailableApi.Enabled = true;
                         listFilesLoaded.Items.Add(obtainedFile);
                         listFilesLoaded.SelectedItem = obtainedFile;
                     },
@@ -90,7 +108,10 @@ namespace funny_neko_giver
             }
             else
             {
-                MessageBox.Show(Resources.error_category, Resources.dialog_messages_error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    Resources.error_category, Resources.dialog_messages_error,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error
+                );
             }
         }
 
@@ -98,9 +119,8 @@ namespace funny_neko_giver
         {
             if (listFilesLoaded.SelectedItem != null)
             {
-                var description = listFilesLoaded.SelectedItem as FileDescription;
-                textDescription.Text =
-                    string.Format(Resources.result_search_filled, description.ArtistName, description.ArtistName, description.SourceUrl);
+                var description = listFilesLoaded.SelectedItem as ResultImage;
+                textDescription.Text = description.FormattedDescription;
                 pictureBox.Image = description.ImageItself;
             }
             else
