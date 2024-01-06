@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
 using funny_neko_giver.Properties;
 using Newtonsoft.Json;
 
@@ -13,9 +12,10 @@ namespace funny_neko_giver
     {
         public NekosFunApiProvider()
         {
-            Name = "NEKOS.FUN";
+            Name = "Nekos.Fun";
             UrlSimple = "https://www.nekos.fun/";
         }
+
         public override IImageProviderApi CreateInstance()
         {
             return new NekosFunApi();
@@ -26,41 +26,42 @@ namespace funny_neko_giver
     {
         public string Image { get; set; }
     }
-    
+
     public class NekosFunApi : IImageProviderApi
     {
+        /* Well, the tags list is offline. */
         private static readonly IEnumerable<CategoryImage> LocalCategories = new[]
         {
-            new CategoryImage {Name = "kiss", Type = "SFW"},
-            new CategoryImage {Name = "lick", Type = "SFW"},
-            new CategoryImage {Name = "hug", Type = "SFW"},
-            new CategoryImage {Name = "baka", Type = "SFW"},
-            new CategoryImage {Name = "cry", Type = "SFW"},
-            new CategoryImage {Name = "poke", Type = "SFW"},
-            new CategoryImage {Name = "smug", Type = "SFW"},
-            new CategoryImage {Name = "slap", Type = "SFW"},
-            new CategoryImage {Name = "tickle", Type = "SFW"},
-            new CategoryImage {Name = "pat", Type = "SFW"},
-            new CategoryImage {Name = "laugh", Type = "SFW"},
-            new CategoryImage {Name = "feed", Type = "SFW"},
-            new CategoryImage {Name = "cuddle", Type = "SFW"},
-            new CategoryImage {Name = "4k", Type = "NSFW"},
-            new CategoryImage {Name = "ass", Type = "NSFW"},
-            new CategoryImage {Name = "blowjob", Type = "NSFW"},
-            new CategoryImage {Name = "boobs", Type = "NSFW"},
-            new CategoryImage {Name = "cum", Type = "NSFW"},
-            new CategoryImage {Name = "feet", Type = "NSFW"},
-            new CategoryImage {Name = "hentai", Type = "NSFW"},
-            new CategoryImage {Name = "wallpapers", Type = "NSFW"},
-            new CategoryImage {Name = "spank", Type = "NSFW"},
-            new CategoryImage {Name = "gasm", Type = "NSFW"},
-            new CategoryImage {Name = "lesbian", Type = "NSFW"},
-            new CategoryImage {Name = "lewd", Type = "NSFW"},
-            new CategoryImage {Name = "pussy", Type = "NSFW"}
+            new CategoryImage { Name = "kiss" },
+            new CategoryImage { Name = "lick" },
+            new CategoryImage { Name = "hug" },
+            new CategoryImage { Name = "baka" },
+            new CategoryImage { Name = "cry" },
+            new CategoryImage { Name = "poke" },
+            new CategoryImage { Name = "smug" },
+            new CategoryImage { Name = "slap" },
+            new CategoryImage { Name = "tickle" },
+            new CategoryImage { Name = "pat" },
+            new CategoryImage { Name = "laugh" },
+            new CategoryImage { Name = "feed" },
+            new CategoryImage { Name = "cuddle" },
+            new CategoryImage { Name = "4k", IsSafe = false },
+            new CategoryImage { Name = "ass", IsSafe = false },
+            new CategoryImage { Name = "blowjob", IsSafe = false },
+            new CategoryImage { Name = "boobs", IsSafe = false },
+            new CategoryImage { Name = "cum", IsSafe = false },
+            new CategoryImage { Name = "feet", IsSafe = false },
+            new CategoryImage { Name = "hentai", IsSafe = false },
+            new CategoryImage { Name = "wallpapers", IsSafe = false },
+            new CategoryImage { Name = "spank", IsSafe = false },
+            new CategoryImage { Name = "gasm", IsSafe = false },
+            new CategoryImage { Name = "lesbian", IsSafe = false },
+            new CategoryImage { Name = "lewd", IsSafe = false },
+            new CategoryImage { Name = "pussy", IsSafe = false }
         };
 
         private HttpClient _localHttpClient;
-        
+
         public IEnumerable<CategoryImage> GetCategories()
         {
             return LocalCategories;
@@ -82,21 +83,25 @@ namespace funny_neko_giver
             {
                 var cancellationToken = new CancellationTokenSource();
                 doProgress(Resources.progress_connectapi);
-                var message = await GetMessageAsync(cancellationToken, $"http://api.nekos.fun:8080/api/{category.Name}");
+                var message = await GeneralAccess.GetMessageAsync(cancellationToken, _localHttpClient,
+                    $"http://api.nekos.fun:8080/api/{category.Name}");
                 if (cancellationToken.IsCancellationRequested)
                 {
                     onError(Resources.error_accessapi);
                     continue;
                 }
+
                 doProgress(Resources.progress_fetching);
                 var listDescription = JsonConvert.DeserializeObject<BindedImageResult>(message);
                 doProgress(string.Format(Resources.progress_downloadimage, i, amount));
-                
+
                 /* Description Name */
                 var idx = listDescription.Image.LastIndexOf('/');
-                var imageName =idx != -1 ? listDescription.Image.Substring(idx + 1).Split('.')[0] : listDescription.Image;
+                var imageName = idx != -1
+                    ? listDescription.Image.Substring(idx + 1).Split('.')[0]
+                    : listDescription.Image;
                 Image imageItself = null;
-                
+
                 var response = await _localHttpClient.GetAsync(listDescription.Image);
                 if (response.IsSuccessStatusCode)
                 {
@@ -110,7 +115,7 @@ namespace funny_neko_giver
                 {
                     onError(Resources.error_downloadimage);
                 }
-                
+
                 onSuccess(new ResultImage
                 {
                     ImageName = imageName,
@@ -122,18 +127,6 @@ namespace funny_neko_giver
             }
 
             onFinal();
-        }
-        
-        private async Task<string> GetMessageAsync(CancellationTokenSource c, string uri)
-        {
-            var response = await _localHttpClient.GetAsync(uri);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-
-            c?.Cancel();
-            return $"Error accessing: {response.ReasonPhrase}";
         }
     }
 }

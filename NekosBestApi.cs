@@ -27,15 +27,15 @@ namespace funny_neko_giver
     {
         [JsonProperty("results")] public IEnumerable<FileDescription> Results;
     }
-    
-    public class NekosBestApiProvider : ImageApiDescription {
 
+    public class NekosBestApiProvider : ImageApiDescription
+    {
         public NekosBestApiProvider()
         {
-            Name = "NEKOS.BEST (v2)";
+            Name = "Nekos.best (v2)";
             UrlSimple = "https://nekos.best/";
         }
-        
+
         public override IImageProviderApi CreateInstance()
         {
             return new NekosBestApi();
@@ -70,7 +70,8 @@ namespace funny_neko_giver
         {
             var c = new CancellationTokenSource();
             doProgress(Resources.progress_connectapi);
-            var message = await GetMessageAsync(c, $"https://nekos.best/api/v2/{category.Name}?amount={amount}");
+            var message = await GeneralAccess.GetMessageAsync(c, _localHttpClient,
+                $"https://nekos.best/api/v2/{category.Name}?amount={amount}");
             if (c.IsCancellationRequested)
             {
                 onError(Resources.error_accessapi);
@@ -88,7 +89,7 @@ namespace funny_neko_giver
 
                 /* Description Name */
                 var idx = description.Url.LastIndexOf('/');
-                var imageName =idx != -1 ? description.Url.Substring(idx + 1).Split('.')[0] : description.Url;
+                var imageName = idx != -1 ? description.Url.Substring(idx + 1).Split('.')[0] : description.Url;
                 Image imageItself = null;
 
                 var response = await _localHttpClient.GetAsync(description.Url);
@@ -106,14 +107,16 @@ namespace funny_neko_giver
                 }
 
                 var builder = new StringBuilder();
-                if (!string.IsNullOrEmpty(description.AnimeName)) builder.Append("Anime Name: ").Append(description.AnimeName).Append("\n");
-                if (!string.IsNullOrEmpty(description.ArtistName)) builder.Append("Author: ").Append(description.ArtistName).Append("\n");
-                if (!string.IsNullOrEmpty(description.ArtistHref)) builder.Append("Author URL: ").Append(description.ArtistHref).Append("\n");
-                if (!string.IsNullOrEmpty(description.SourceUrl)) builder.Append("Source URL: ").Append(description.ArtistHref).Append("\n");
-                
-                
-                
-                
+                if (!string.IsNullOrEmpty(description.AnimeName))
+                    builder.Append("Anime Name: ").Append(description.AnimeName).Append("\n");
+                if (!string.IsNullOrEmpty(description.ArtistName))
+                    builder.Append("Author: ").Append(description.ArtistName).Append("\n");
+                if (!string.IsNullOrEmpty(description.ArtistHref))
+                    builder.Append("Author URL: ").Append(description.ArtistHref).Append("\n");
+                if (!string.IsNullOrEmpty(description.SourceUrl))
+                    builder.Append("Source URL: ").Append(description.ArtistHref).Append("\n");
+
+
                 onSuccess(new ResultImage
                 {
                     ImageName = imageName,
@@ -134,7 +137,8 @@ namespace funny_neko_giver
 
         private async Task<IEnumerable<CategoryImage>> BuildCategoryList(CancellationTokenSource c)
         {
-            var message = await GetMessageAsync(c, "https://nekos.best/api/v2/endpoints");
+            var message =
+                await GeneralAccess.GetMessageAsync(c, _localHttpClient, "https://nekos.best/api/v2/endpoints");
             if (c.IsCancellationRequested)
             {
                 MessageBox.Show(message, Resources.dialog_messages_error, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -142,20 +146,8 @@ namespace funny_neko_giver
             }
 
             var images = JObject.Parse(message).Properties().Select(v => new CategoryImage
-                { Name = v.Name, Type = v.Value["format"].ToObject<string>() });
+                { Name = v.Name, Type = v.Value["format"].ToObject<string>().ToUpper() });
             return images;
-        }
-
-        private async Task<string> GetMessageAsync(CancellationTokenSource c, string uri)
-        {
-            var response = await _localHttpClient.GetAsync(uri);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-
-            c?.Cancel();
-            return $"Error accessing: {response.ReasonPhrase}";
         }
     }
 }

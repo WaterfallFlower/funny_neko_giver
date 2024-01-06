@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace funny_neko_giver
 {
@@ -9,10 +12,23 @@ namespace funny_neko_giver
     {
         public string Name { get; set; }
         public string Type { get; set; }
+        public int Id { get; set; }
+        public bool IsSafe { get; set; } = true;
 
         public override string ToString()
         {
-            return Type != null ? $"{Name} ({Type})" : Name;
+            if (Name == "RANDOM")
+            {
+                return Name;
+            }
+            var builder = new StringBuilder();
+            builder.Append(Name).Append(" ");
+            if (Type != null)
+            {
+                builder.Append('(').Append(Type).Append(") ");
+            }
+            builder.Append(IsSafe ? "(SFW)" : "(NSFW)");
+            return builder.ToString();
         }
     }
 
@@ -29,7 +45,7 @@ namespace funny_neko_giver
             return ImageName;
         }
     }
-    
+
     public abstract class ImageApiDescription
     {
         public string Name { get; set; }
@@ -46,7 +62,7 @@ namespace funny_neko_giver
     public interface IImageProviderApi
     {
         IEnumerable<CategoryImage> GetCategories();
-        
+
         void Init(HttpClient client, Action<string> onError, Action<IImageProviderApi> onSuccess);
 
         void LoadCategoryImage(
@@ -54,5 +70,22 @@ namespace funny_neko_giver
             Action<string> onError, Action<ResultImage> onSuccess,
             Action<string> doProgress, Action onFinal
         );
+    }
+
+    public class GeneralAccess
+    {
+        public static async Task<string> GetMessageAsync(
+            CancellationTokenSource c, HttpClient _localHttpClient,string uri
+            )
+        {
+            var response = await _localHttpClient.GetAsync(uri);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+
+            c?.Cancel();
+            return $"Error accessing: {response.ReasonPhrase}";
+        }
     }
 }

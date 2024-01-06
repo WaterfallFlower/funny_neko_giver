@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -55,10 +56,11 @@ namespace funny_neko_giver
                 pictureBox.Invalidate();
                 return;
             }
+
             var ratioUpdate = _percentZoom * 0.01; //Same as "/ 100"
             var width = (int)(ratioUpdate * description.ImageItself.Width);
             var height = (int)(ratioUpdate * description.ImageItself.Height);
-            
+
             var zoomedImage = new Bitmap(width, height);
             using (var g = Graphics.FromImage(zoomedImage))
             {
@@ -78,6 +80,7 @@ namespace funny_neko_giver
                 pictureBox.Image.Dispose();
                 pictureBox.Image = Resources.image_icon;
             }
+
             pictureBox.Invalidate();
             listFilesLoaded.SelectedItem = null;
             OnListBoxIndexChange(sender, eventArgs);
@@ -87,6 +90,7 @@ namespace funny_neko_giver
                 Console.WriteLine($"Disposing... {image}");
                 image.ImageItself.Dispose();
             }
+
             listFilesLoaded.Items.Clear();
 
             foreach (var image in _filesToRemove)
@@ -100,15 +104,16 @@ namespace funny_neko_giver
                     Console.WriteLine($"Error while removing file {image}!\n{ex}");
                 }
             }
+
             _filesToRemove.Clear();
         }
-        
+
         private void CallNewApi()
         {
             listCategory.Items.Clear();
 
             var access1 = listAvailableApi.SelectedItem as ImageApiDescription;
-            
+
             buttonLoad.Enabled = listCategory.Enabled = false;
             _apiInstance = access1.CreateInstance();
             _apiInstance.Init(
@@ -127,6 +132,7 @@ namespace funny_neko_giver
                     {
                         listCategory.Items.Add(i);
                     }
+
                     listCategory.SelectedIndex = 0;
                     buttonLoad.Enabled = listCategory.Enabled = true;
                 });
@@ -135,7 +141,8 @@ namespace funny_neko_giver
         private void OnFormLoad(object sender, EventArgs e)
         {
             /* Setting up the progress bar and other utils */
-            toolMenuImage.Enabled = actionButtonZoomIn.Enabled = actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = false;
+            toolMenuImage.Enabled = actionButtonZoomIn.Enabled =
+                actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = false;
             progressBar.Value = 0;
             progressBar.Maximum = 0;
             progressBar.Step = 1;
@@ -151,6 +158,7 @@ namespace funny_neko_giver
             buttonDeleteAll.Text = Resources.form_button_deleteall;
             buttonDownloadAll.Text = Resources.form_button_downloadall;
             toolMenuMain.Text = Resources.form_tool_strip_main;
+            toolMenuExternal.Text = Resources.form_tool_strip_external;
             toolMenuImage.Text = Resources.form_tool_strip_image;
             toolMenuAbout.Text = Resources.form_tool_strip_about;
             actionButtonLoad.Text = Resources.form_button_load;
@@ -162,10 +170,11 @@ namespace funny_neko_giver
             actionButtonZoomIn.ToolTipText = Resources.form_tool_strip_zoomin;
             actionButtonZoomOut.ToolTipText = Resources.form_tool_strip_zoomout;
             actionButtonZoomRestore.ToolTipText = Resources.form_tool_strip_zoomrestore;
-            
+
             /* Filling and configuring API list */
             listAvailableApi.Items.Add(new NekosBestApiProvider());
             listAvailableApi.Items.Add(new NekosFunApiProvider());
+            listAvailableApi.Items.Add(new NekosApiProvider());
             listAvailableApi.SelectedIndex = 0;
 
             Application.ApplicationExit += OnClearTempFolder;
@@ -182,7 +191,8 @@ namespace funny_neko_giver
                     {
                         buttonLoad.Enabled = numAmount.Enabled = listAvailableApi.Enabled = true;
                         MessageBox.Show(
-                            string.Format(Resources.error_connectapi, new object[]{stringError}), Resources.dialog_messages_error,
+                            string.Format(Resources.error_connectapi, new object[] { stringError }),
+                            Resources.dialog_messages_error,
                             MessageBoxButtons.OK, MessageBoxIcon.Error
                         );
                     },
@@ -207,7 +217,8 @@ namespace funny_neko_giver
         {
             if (listFilesLoaded.SelectedItem != null)
             {
-                toolMenuImage.Enabled = actionButtonZoomIn.Enabled = actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = true;
+                toolMenuImage.Enabled = actionButtonZoomIn.Enabled =
+                    actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = true;
                 var description = listFilesLoaded.SelectedItem as ResultImage;
                 textDescription.Text = description.FormattedDescription;
                 if (_shouldBeDisposed)
@@ -216,6 +227,7 @@ namespace funny_neko_giver
                     pictureBox.Image = Resources.image_icon;
                     _shouldBeDisposed = false;
                 }
+
                 UpdateZoomPicture(100, false); //Default value
                 if (description.NeedAnimation)
                 {
@@ -225,6 +237,7 @@ namespace funny_neko_giver
                         description.ImageItself.Save(uniqueTempFilePath, ImageFormat.Gif);
                         _filesToRemove.Add(uniqueTempFilePath);
                     }
+
                     pictureBox.Image = Image.FromFile(uniqueTempFilePath);
                     pictureBox.Invalidate();
                     actionButtonZoomIn.Enabled = actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = false;
@@ -241,7 +254,8 @@ namespace funny_neko_giver
             {
                 pictureBox.Image = Resources.image_icon;
                 textDescription.Text = "";
-                toolMenuImage.Enabled = actionButtonZoomIn.Enabled = actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = false;
+                toolMenuImage.Enabled = actionButtonZoomIn.Enabled =
+                    actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = false;
             }
         }
 
@@ -282,12 +296,14 @@ namespace funny_neko_giver
                 Clipboard.SetImage(image.ImageItself);
                 return;
             }
+
             var uniqueTempFilePath = Path.Combine(Path.GetTempPath(), image.ImageName + ".gif");
             if (!File.Exists(uniqueTempFilePath))
             {
                 image.ImageItself.Save(uniqueTempFilePath, ImageFormat.Gif);
                 _filesToRemove.Add(uniqueTempFilePath);
             }
+
             Clipboard.SetFileDropList(new StringCollection { uniqueTempFilePath });
             Console.WriteLine(uniqueTempFilePath);
         }
@@ -316,7 +332,8 @@ namespace funny_neko_giver
 
         private void OnButtonDeleteAllClick(object sender, EventArgs e)
         {
-            var k = MessageBox.Show(this, "Are you sure you want to delete everything?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var k = MessageBox.Show(this, "Are you sure you want to delete everything?", "Warning",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (k != DialogResult.Yes) return;
             OnClearTempFolder(sender, e);
             listFilesLoaded.Items.Clear();
@@ -325,14 +342,23 @@ namespace funny_neko_giver
         }
 
         private void OnButtonDownloadAllClick(object sender, EventArgs e)
-        {           
-            var k = MessageBox.Show(this, $"Are you sure you want to downlaod {listFilesLoaded.Items.Count} files?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        {
+            var k = MessageBox.Show(this, $"Are you sure you want to downlaod {listFilesLoaded.Items.Count} files?",
+                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (k != DialogResult.Yes) return;
             foreach (var item in listFilesLoaded.Items)
             {
                 var image = item as ResultImage;
-                image.ImageItself.Save(image.ImageName + (image.NeedAnimation ? ".gif" : ".png"), image.NeedAnimation ? ImageFormat.Gif : ImageFormat.Png);
+                image.ImageItself.Save(image.ImageName + (image.NeedAnimation ? ".gif" : ".png"),
+                    image.NeedAnimation ? ImageFormat.Gif : ImageFormat.Png);
             }
+        }
+
+        private void OnButtonLinkApiClick(object sender, EventArgs e)
+        {
+            if (listAvailableApi.SelectedItem == null) return;
+            var apiGet = listAvailableApi.SelectedItem as ImageApiDescription;
+            Process.Start(new ProcessStartInfo(apiGet.UrlSimple) { UseShellExecute = true });
         }
     }
 }

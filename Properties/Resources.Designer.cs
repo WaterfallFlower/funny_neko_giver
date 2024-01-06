@@ -116,6 +116,15 @@ namespace funny_neko_giver.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No any available images found!.
+        /// </summary>
+        internal static string error_emptycatalogue {
+            get {
+                return ResourceManager.GetString("error.emptycatalogue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete All.
         /// </summary>
         internal static string form_button_deleteall {
@@ -211,6 +220,15 @@ namespace funny_neko_giver.Properties {
         internal static string form_tool_strip_copyurl {
             get {
                 return ResourceManager.GetString("form.tool_strip.copyurl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External.
+        /// </summary>
+        internal static string form_tool_strip_external {
+            get {
+                return ResourceManager.GetString("form.tool_strip.external", resourceCulture);
             }
         }
         

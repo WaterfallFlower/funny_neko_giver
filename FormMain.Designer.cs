@@ -31,6 +31,7 @@
         {
             this.buttonLoad = new System.Windows.Forms.Button();
             this.groupBoxMain = new System.Windows.Forms.GroupBox();
+            this.buttonLinkApi = new System.Windows.Forms.Button();
             this.listAvailableApi = new System.Windows.Forms.ComboBox();
             this.labelCurrentApi = new System.Windows.Forms.Label();
             this.groupBoxProgress = new System.Windows.Forms.GroupBox();
@@ -50,6 +51,7 @@
             this.toolMenuMain = new System.Windows.Forms.ToolStripDropDownButton();
             this.actionButtonLoad = new System.Windows.Forms.ToolStripMenuItem();
             this.actionButtonSearch = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolMenuExternal = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolMenuImage = new System.Windows.Forms.ToolStripDropDownButton();
             this.actionButtonLocalSave = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -74,7 +76,7 @@
             // 
             // buttonLoad
             // 
-            this.buttonLoad.Location = new System.Drawing.Point(165, 45);
+            this.buttonLoad.Location = new System.Drawing.Point(168, 45);
             this.buttonLoad.Name = "buttonLoad";
             this.buttonLoad.Size = new System.Drawing.Size(75, 23);
             this.buttonLoad.TabIndex = 0;
@@ -85,6 +87,7 @@
             // groupBoxMain
             // 
             this.groupBoxMain.AutoSize = true;
+            this.groupBoxMain.Controls.Add(this.buttonLinkApi);
             this.groupBoxMain.Controls.Add(this.listAvailableApi);
             this.groupBoxMain.Controls.Add(this.labelCurrentApi);
             this.groupBoxMain.Controls.Add(this.groupBoxProgress);
@@ -103,12 +106,22 @@
             this.groupBoxMain.TabIndex = 1;
             this.groupBoxMain.TabStop = false;
             // 
+            // buttonLinkApi
+            // 
+            this.buttonLinkApi.Image = global::funny_neko_giver.Properties.Resources.link_icon;
+            this.buttonLinkApi.Location = new System.Drawing.Point(220, 16);
+            this.buttonLinkApi.Name = "buttonLinkApi";
+            this.buttonLinkApi.Size = new System.Drawing.Size(23, 23);
+            this.buttonLinkApi.TabIndex = 11;
+            this.buttonLinkApi.UseVisualStyleBackColor = true;
+            this.buttonLinkApi.Click += new System.EventHandler(this.OnButtonLinkApiClick);
+            // 
             // listAvailableApi
             // 
             this.listAvailableApi.FormattingEnabled = true;
             this.listAvailableApi.Location = new System.Drawing.Point(76, 18);
             this.listAvailableApi.Name = "listAvailableApi";
-            this.listAvailableApi.Size = new System.Drawing.Size(161, 21);
+            this.listAvailableApi.Size = new System.Drawing.Size(138, 21);
             this.listAvailableApi.TabIndex = 10;
             this.listAvailableApi.SelectedIndexChanged += new System.EventHandler(this.OnApiListIndexChange);
             // 
@@ -210,7 +223,7 @@
             // listCategory
             // 
             this.listCategory.FormattingEnabled = true;
-            this.listCategory.Location = new System.Drawing.Point(6, 45);
+            this.listCategory.Location = new System.Drawing.Point(6, 47);
             this.listCategory.Name = "listCategory";
             this.listCategory.Size = new System.Drawing.Size(156, 21);
             this.listCategory.TabIndex = 1;
@@ -253,7 +266,7 @@
             // 
             // toolStripMain
             // 
-            this.toolStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.toolMenuMain, this.toolMenuImage, this.toolMenuAbout, this.toolStripSeparator1, this.actionButtonZoomIn, this.actionButtonZoomOut, this.actionButtonZoomRestore, this.labelPercentage });
+            this.toolStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.toolMenuMain, this.toolMenuExternal, this.toolMenuImage, this.toolMenuAbout, this.toolStripSeparator1, this.actionButtonZoomIn, this.actionButtonZoomOut, this.actionButtonZoomRestore, this.labelPercentage });
             this.toolStripMain.Location = new System.Drawing.Point(249, 0);
             this.toolStripMain.Name = "toolStripMain";
             this.toolStripMain.Size = new System.Drawing.Size(467, 25);
@@ -282,6 +295,14 @@
             this.actionButtonSearch.Name = "actionButtonSearch";
             this.actionButtonSearch.Size = new System.Drawing.Size(152, 22);
             this.actionButtonSearch.Text = "Search (Query)";
+            // 
+            // toolMenuExternal
+            // 
+            this.toolMenuExternal.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolMenuExternal.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolMenuExternal.Name = "toolMenuExternal";
+            this.toolMenuExternal.Size = new System.Drawing.Size(62, 22);
+            this.toolMenuExternal.Text = "External";
             // 
             // toolMenuImage
             // 
@@ -406,6 +427,10 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Button buttonLinkApi;
+
+        private System.Windows.Forms.ToolStripDropDownButton toolMenuExternal;
 
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem actionButtonCopyResizedImage;

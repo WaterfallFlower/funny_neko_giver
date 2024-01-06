@@ -165,4 +165,10 @@
   <data name="form.tool_strip.copyresimage" xml:space="preserve">
     <value>Copy Resized Image</value>
   </data>
+  <data name="form.tool_strip.external" xml:space="preserve">
+    <value>External</value>
+  </data>
+  <data name="error.emptycatalogue" xml:space="preserve">
+    <value>No any available images found!</value>
+  </data>
 </root>
