@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Net.Http;
 
 namespace funny_neko_giver
 {
@@ -19,6 +20,8 @@ namespace funny_neko_giver
     {
         public Image ImageItself { get; set; }
         public string ImageName { get; set; }
+        public bool NeedAnimation { get; set; }
+        public string SourceUrl { get; set; }
         public string FormattedDescription { get; set; }
 
         public override string ToString()
@@ -44,7 +47,7 @@ namespace funny_neko_giver
     {
         IEnumerable<CategoryImage> GetCategories();
         
-        void Init(Action<string> onError, Action<IImageProviderApi> onSuccess);
+        void Init(HttpClient client, Action<string> onError, Action<IImageProviderApi> onSuccess);
 
         void LoadCategoryImage(
             CategoryImage category, int amount,

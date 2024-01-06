@@ -29,7 +29,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.buttonLoad = new System.Windows.Forms.Button();
             this.groupBoxMain = new System.Windows.Forms.GroupBox();
             this.listAvailableApi = new System.Windows.Forms.ComboBox();
@@ -50,6 +49,19 @@
             this.toolStripMain = new System.Windows.Forms.ToolStrip();
             this.toolMenuMain = new System.Windows.Forms.ToolStripDropDownButton();
             this.actionButtonLoad = new System.Windows.Forms.ToolStripMenuItem();
+            this.actionButtonSearch = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolMenuImage = new System.Windows.Forms.ToolStripDropDownButton();
+            this.actionButtonLocalSave = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.actionButtonCopyUrl = new System.Windows.Forms.ToolStripMenuItem();
+            this.actionButtonCopyImage = new System.Windows.Forms.ToolStripMenuItem();
+            this.actionButtonCopyResizedImage = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolMenuAbout = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.actionButtonZoomIn = new System.Windows.Forms.ToolStripButton();
+            this.actionButtonZoomOut = new System.Windows.Forms.ToolStripButton();
+            this.actionButtonZoomRestore = new System.Windows.Forms.ToolStripButton();
+            this.labelPercentage = new System.Windows.Forms.ToolStripLabel();
             this.groupBoxMain.SuspendLayout();
             this.groupBoxProgress.SuspendLayout();
             this.groupBoxDescription.SuspendLayout();
@@ -90,7 +102,6 @@
             this.groupBoxMain.Size = new System.Drawing.Size(249, 401);
             this.groupBoxMain.TabIndex = 1;
             this.groupBoxMain.TabStop = false;
-            this.groupBoxMain.Text = "Configure";
             // 
             // listAvailableApi
             // 
@@ -99,6 +110,7 @@
             this.listAvailableApi.Name = "listAvailableApi";
             this.listAvailableApi.Size = new System.Drawing.Size(161, 21);
             this.listAvailableApi.TabIndex = 10;
+            this.listAvailableApi.SelectedIndexChanged += new System.EventHandler(this.OnApiListIndexChange);
             // 
             // labelCurrentApi
             // 
@@ -118,7 +130,6 @@
             this.groupBoxProgress.Size = new System.Drawing.Size(237, 56);
             this.groupBoxProgress.TabIndex = 8;
             this.groupBoxProgress.TabStop = false;
-            this.groupBoxProgress.Text = "No tasks running...";
             // 
             // progressBar
             // 
@@ -138,7 +149,6 @@
             this.groupBoxDescription.Size = new System.Drawing.Size(237, 75);
             this.groupBoxDescription.TabIndex = 7;
             this.groupBoxDescription.TabStop = false;
-            this.groupBoxDescription.Text = "File Description";
             // 
             // textDescription
             // 
@@ -158,6 +168,7 @@
             this.buttonDeleteAll.TabIndex = 6;
             this.buttonDeleteAll.Text = "Delete All";
             this.buttonDeleteAll.UseVisualStyleBackColor = true;
+            this.buttonDeleteAll.Click += new System.EventHandler(this.OnButtonDeleteAllClick);
             // 
             // buttonDownloadAll
             // 
@@ -167,6 +178,7 @@
             this.buttonDownloadAll.TabIndex = 5;
             this.buttonDownloadAll.Text = "Download All";
             this.buttonDownloadAll.UseVisualStyleBackColor = true;
+            this.buttonDownloadAll.Click += new System.EventHandler(this.buttonDownloadAll_Click);
             // 
             // listFilesLoaded
             // 
@@ -175,16 +187,15 @@
             this.listFilesLoaded.Name = "listFilesLoaded";
             this.listFilesLoaded.Size = new System.Drawing.Size(237, 121);
             this.listFilesLoaded.TabIndex = 4;
-            this.listFilesLoaded.SelectedIndexChanged += new System.EventHandler(this.OnComboBoxIndexChange);
+            this.listFilesLoaded.SelectedIndexChanged += new System.EventHandler(this.OnListBoxIndexChange);
             // 
             // labelAmount
             // 
             this.labelAmount.AutoSize = true;
             this.labelAmount.Location = new System.Drawing.Point(6, 76);
             this.labelAmount.Name = "labelAmount";
-            this.labelAmount.Size = new System.Drawing.Size(46, 13);
+            this.labelAmount.Size = new System.Drawing.Size(0, 13);
             this.labelAmount.TabIndex = 3;
-            this.labelAmount.Text = "Amount:";
             // 
             // numAmount
             // 
@@ -215,11 +226,11 @@
             this.groupBox1.Size = new System.Drawing.Size(467, 401);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Preview";
             // 
             // panelForPicture
             // 
             this.panelForPicture.AutoScroll = true;
+            this.panelForPicture.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panelForPicture.Controls.Add(this.pictureBox);
             this.panelForPicture.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForPicture.Location = new System.Drawing.Point(3, 16);
@@ -229,28 +240,29 @@
             // 
             // pictureBox
             // 
-            this.pictureBox.Location = new System.Drawing.Point(3, 5);
+            this.pictureBox.ErrorImage = global::funny_neko_giver.Properties.Resources.image_icon;
+            this.pictureBox.InitialImage = null;
+            this.pictureBox.Location = new System.Drawing.Point(0, 0);
             this.pictureBox.MinimumSize = new System.Drawing.Size(320, 320);
             this.pictureBox.Name = "pictureBox";
             this.pictureBox.Size = new System.Drawing.Size(334, 350);
             this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.pictureBox.TabIndex = 0;
             this.pictureBox.TabStop = false;
+            this.pictureBox.WaitOnLoad = true;
             // 
             // toolStripMain
             // 
-            this.toolStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.toolMenuMain });
+            this.toolStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.toolMenuMain, this.toolMenuImage, this.toolMenuAbout, this.toolStripSeparator1, this.actionButtonZoomIn, this.actionButtonZoomOut, this.actionButtonZoomRestore, this.labelPercentage });
             this.toolStripMain.Location = new System.Drawing.Point(249, 0);
             this.toolStripMain.Name = "toolStripMain";
             this.toolStripMain.Size = new System.Drawing.Size(467, 25);
             this.toolStripMain.TabIndex = 4;
-            this.toolStripMain.Text = "toolStrip1";
             // 
             // toolMenuMain
             // 
             this.toolMenuMain.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolMenuMain.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.actionButtonLoad });
-            this.toolMenuMain.Image = ((System.Drawing.Image)(resources.GetObject("toolMenuMain.Image")));
+            this.toolMenuMain.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.actionButtonLoad, this.actionButtonSearch });
             this.toolMenuMain.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolMenuMain.Name = "toolMenuMain";
             this.toolMenuMain.Size = new System.Drawing.Size(47, 22);
@@ -258,11 +270,116 @@
             // 
             // actionButtonLoad
             // 
-            this.actionButtonLoad.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.actionButtonLoad.Image = global::funny_neko_giver.Properties.Resources.image_icon;
             this.actionButtonLoad.Name = "actionButtonLoad";
-            this.actionButtonLoad.Size = new System.Drawing.Size(100, 22);
+            this.actionButtonLoad.Size = new System.Drawing.Size(152, 22);
             this.actionButtonLoad.Text = "Load";
             this.actionButtonLoad.Click += new System.EventHandler(this.OnLoadButtonClick);
+            // 
+            // actionButtonSearch
+            // 
+            this.actionButtonSearch.Image = global::funny_neko_giver.Properties.Resources.websearch_icon;
+            this.actionButtonSearch.Name = "actionButtonSearch";
+            this.actionButtonSearch.Size = new System.Drawing.Size(152, 22);
+            this.actionButtonSearch.Text = "Search (Query)";
+            // 
+            // toolMenuImage
+            // 
+            this.toolMenuImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolMenuImage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.actionButtonLocalSave, this.toolStripSeparator2, this.actionButtonCopyUrl, this.actionButtonCopyImage, this.actionButtonCopyResizedImage });
+            this.toolMenuImage.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolMenuImage.Name = "toolMenuImage";
+            this.toolMenuImage.Size = new System.Drawing.Size(53, 22);
+            this.toolMenuImage.Text = "Image";
+            // 
+            // actionButtonLocalSave
+            // 
+            this.actionButtonLocalSave.Image = global::funny_neko_giver.Properties.Resources.save_icon;
+            this.actionButtonLocalSave.Name = "actionButtonLocalSave";
+            this.actionButtonLocalSave.Size = new System.Drawing.Size(180, 22);
+            this.actionButtonLocalSave.Text = "Save (Local)";
+            this.actionButtonLocalSave.Click += new System.EventHandler(this.OnSaveImageClick);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            // 
+            // actionButtonCopyUrl
+            // 
+            this.actionButtonCopyUrl.Image = global::funny_neko_giver.Properties.Resources.link_icon;
+            this.actionButtonCopyUrl.Name = "actionButtonCopyUrl";
+            this.actionButtonCopyUrl.Size = new System.Drawing.Size(180, 22);
+            this.actionButtonCopyUrl.Text = "Copy Image URL";
+            this.actionButtonCopyUrl.Click += new System.EventHandler(this.OnCopyURLClick);
+            // 
+            // actionButtonCopyImage
+            // 
+            this.actionButtonCopyImage.Image = global::funny_neko_giver.Properties.Resources.copyfile_icon;
+            this.actionButtonCopyImage.Name = "actionButtonCopyImage";
+            this.actionButtonCopyImage.Size = new System.Drawing.Size(180, 22);
+            this.actionButtonCopyImage.Text = "Copy Image";
+            this.actionButtonCopyImage.Click += new System.EventHandler(this.OnCopyImageClick);
+            // 
+            // actionButtonCopyResizedImage
+            // 
+            this.actionButtonCopyResizedImage.Image = global::funny_neko_giver.Properties.Resources.copyfile_icon;
+            this.actionButtonCopyResizedImage.Name = "actionButtonCopyResizedImage";
+            this.actionButtonCopyResizedImage.Size = new System.Drawing.Size(180, 22);
+            this.actionButtonCopyResizedImage.Text = "Copy Resized Image";
+            this.actionButtonCopyResizedImage.Click += new System.EventHandler(this.OnCopyResizedImageClick);
+            // 
+            // toolMenuAbout
+            // 
+            this.toolMenuAbout.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolMenuAbout.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolMenuAbout.Name = "toolMenuAbout";
+            this.toolMenuAbout.Size = new System.Drawing.Size(53, 22);
+            this.toolMenuAbout.Text = "About";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // actionButtonZoomIn
+            // 
+            this.actionButtonZoomIn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.actionButtonZoomIn.Image = global::funny_neko_giver.Properties.Resources.zoomin_icon;
+            this.actionButtonZoomIn.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.actionButtonZoomIn.Name = "actionButtonZoomIn";
+            this.actionButtonZoomIn.Size = new System.Drawing.Size(23, 22);
+            this.actionButtonZoomIn.Text = "toolStripButton1";
+            this.actionButtonZoomIn.ToolTipText = "Zoom In";
+            this.actionButtonZoomIn.Click += new System.EventHandler(this.OnZoomInImage);
+            // 
+            // actionButtonZoomOut
+            // 
+            this.actionButtonZoomOut.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.actionButtonZoomOut.Image = global::funny_neko_giver.Properties.Resources.zoomout_icon;
+            this.actionButtonZoomOut.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.actionButtonZoomOut.Name = "actionButtonZoomOut";
+            this.actionButtonZoomOut.Size = new System.Drawing.Size(23, 22);
+            this.actionButtonZoomOut.Text = "toolStripButton1";
+            this.actionButtonZoomOut.ToolTipText = "Zoom Out";
+            this.actionButtonZoomOut.Click += new System.EventHandler(this.OnZoomOutImage);
+            // 
+            // actionButtonZoomRestore
+            // 
+            this.actionButtonZoomRestore.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.actionButtonZoomRestore.Image = global::funny_neko_giver.Properties.Resources.image_icon;
+            this.actionButtonZoomRestore.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.actionButtonZoomRestore.Name = "actionButtonZoomRestore";
+            this.actionButtonZoomRestore.Size = new System.Drawing.Size(23, 22);
+            this.actionButtonZoomRestore.Text = "toolStripButton1";
+            this.actionButtonZoomRestore.ToolTipText = "Restore Zoom";
+            this.actionButtonZoomRestore.Click += new System.EventHandler(this.OnZoomRestoreImage);
+            // 
+            // labelPercentage
+            // 
+            this.labelPercentage.Name = "labelPercentage";
+            this.labelPercentage.Size = new System.Drawing.Size(23, 22);
+            this.labelPercentage.Text = "0%";
             // 
             // FormMain
             // 
@@ -274,7 +391,6 @@
             this.Controls.Add(this.groupBoxMain);
             this.MinimumSize = new System.Drawing.Size(620, 440);
             this.Name = "FormMain";
-            this.Text = "Little Grabber: Nekos";
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.groupBoxMain.ResumeLayout(false);
             this.groupBoxMain.PerformLayout();
@@ -290,6 +406,30 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem actionButtonCopyResizedImage;
+
+        private System.Windows.Forms.ToolStripLabel labelPercentage;
+        private System.Windows.Forms.ToolStripButton actionButtonZoomRestore;
+
+        private System.Windows.Forms.ToolStripButton actionButtonZoomOut;
+
+        private System.Windows.Forms.ToolStripButton actionButtonZoomIn;
+
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+
+        private System.Windows.Forms.ToolStripMenuItem actionButtonCopyImage;
+
+        private System.Windows.Forms.ToolStripMenuItem actionButtonCopyUrl;
+
+        private System.Windows.Forms.ToolStripDropDownButton toolMenuAbout;
+
+        private System.Windows.Forms.ToolStripMenuItem actionButtonSearch;
+
+        private System.Windows.Forms.ToolStripMenuItem actionButtonLocalSave;
+
+        private System.Windows.Forms.ToolStripDropDownButton toolMenuImage;
 
         private System.Windows.Forms.ComboBox listAvailableApi;
 

@@ -82,6 +82,7 @@
             <DependentUpon>FormMain.cs</DependentUpon>
         </Compile>
         <Compile Include="GeneralAccess.cs" />
+        <Compile Include="GifRenderLayer.cs" />
         <Compile Include="NekosBestApi.cs" />
         <Compile Include="NekosFunApi.cs" />
         <Compile Include="Program.cs"/>
@@ -111,6 +112,15 @@
     </ItemGroup>
     <ItemGroup>
         <None Include="App.config"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="Resources\copyfile_icon.png" />
+      <Content Include="Resources\image_icon.png" />
+      <Content Include="Resources\link_icon.png" />
+      <Content Include="Resources\save_icon.png" />
+      <Content Include="Resources\websearch_icon.png" />
+      <Content Include="Resources\zoomin_icon.png" />
+      <Content Include="Resources\zoomout_icon.png" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>

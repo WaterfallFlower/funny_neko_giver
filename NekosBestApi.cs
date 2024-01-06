@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +19,7 @@ namespace funny_neko_giver
         [JsonProperty("artist_href")] public string ArtistHref { get; set; }
         [JsonProperty("artist_name")] public string ArtistName { get; set; }
         [JsonProperty("source_url")] public string SourceUrl { get; set; }
+        [JsonProperty("anime_name")] public string AnimeName { get; set; }
         [JsonProperty("url")] public string Url { get; set; }
     }
 
@@ -41,11 +44,12 @@ namespace funny_neko_giver
 
     public class NekosBestApi : IImageProviderApi
     {
-        private readonly HttpClient _localHttpClient = new HttpClient();
         private IEnumerable<CategoryImage> _categoryList;
+        private HttpClient _localHttpClient;
 
-        public async void Init(Action<string> onError, Action<IImageProviderApi> onSuccess)
+        public async void Init(HttpClient client, Action<string> onError, Action<IImageProviderApi> onSuccess)
         {
+            _localHttpClient = client;
             var cancelOperation = new CancellationTokenSource();
             _categoryList = await BuildCategoryList(cancelOperation);
             if (cancelOperation.IsCancellationRequested)
@@ -90,7 +94,8 @@ namespace funny_neko_giver
                 var response = await _localHttpClient.GetAsync(description.Url);
                 if (response.IsSuccessStatusCode)
                 {
-                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    var imageData = await response.Content.ReadAsByteArrayAsync();
+                    using (var stream = new MemoryStream(imageData))
                     {
                         imageItself = Image.FromStream(stream);
                     }
@@ -99,12 +104,23 @@ namespace funny_neko_giver
                 {
                     onError(Resources.error_downloadimage);
                 }
+
+                var builder = new StringBuilder();
+                if (!string.IsNullOrEmpty(description.AnimeName)) builder.Append("Anime Name: ").Append(description.AnimeName).Append("\n");
+                if (!string.IsNullOrEmpty(description.ArtistName)) builder.Append("Author: ").Append(description.ArtistName).Append("\n");
+                if (!string.IsNullOrEmpty(description.ArtistHref)) builder.Append("Author URL: ").Append(description.ArtistHref).Append("\n");
+                if (!string.IsNullOrEmpty(description.SourceUrl)) builder.Append("Source URL: ").Append(description.ArtistHref).Append("\n");
+                
+                
+                
                 
                 onSuccess(new ResultImage
                 {
                     ImageName = imageName,
                     ImageItself = imageItself,
-                    FormattedDescription = string.Format(Resources.result_search_filled, description.ArtistName, description.ArtistName,description.SourceUrl)
+                    SourceUrl = description.Url,
+                    NeedAnimation = description.Url.EndsWith(".gif"),
+                    FormattedDescription = builder.ToString()
                 });
             }
 

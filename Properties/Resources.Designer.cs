@@ -60,6 +60,16 @@ namespace funny_neko_giver.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap copyfile_icon {
+            get {
+                object obj = ResourceManager.GetObject("copyfile_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
         internal static string dialog_messages_error {
@@ -160,11 +170,130 @@ namespace funny_neko_giver.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current API:.
+        /// </summary>
+        internal static string form_label_currentapi {
+            get {
+                return ResourceManager.GetString("form.label.currentapi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to About.
+        /// </summary>
+        internal static string form_tool_strip_about {
+            get {
+                return ResourceManager.GetString("form.tool_strip.about", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Image.
+        /// </summary>
+        internal static string form_tool_strip_copyimage {
+            get {
+                return ResourceManager.GetString("form.tool_strip.copyimage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Resized Image.
+        /// </summary>
+        internal static string form_tool_strip_copyresimage {
+            get {
+                return ResourceManager.GetString("form.tool_strip.copyresimage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Image URL.
+        /// </summary>
+        internal static string form_tool_strip_copyurl {
+            get {
+                return ResourceManager.GetString("form.tool_strip.copyurl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Image.
+        /// </summary>
+        internal static string form_tool_strip_image {
+            get {
+                return ResourceManager.GetString("form.tool_strip.image", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Main.
         /// </summary>
         internal static string form_tool_strip_main {
             get {
                 return ResourceManager.GetString("form.tool_strip.main", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save (Local).
+        /// </summary>
+        internal static string form_tool_strip_save_local {
+            get {
+                return ResourceManager.GetString("form.tool_strip.save_local", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search (Query).
+        /// </summary>
+        internal static string form_tool_strip_search {
+            get {
+                return ResourceManager.GetString("form.tool_strip.search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zoom In.
+        /// </summary>
+        internal static string form_tool_strip_zoomin {
+            get {
+                return ResourceManager.GetString("form.tool_strip.zoomin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zoom Out.
+        /// </summary>
+        internal static string form_tool_strip_zoomout {
+            get {
+                return ResourceManager.GetString("form.tool_strip.zoomout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore Zoom.
+        /// </summary>
+        internal static string form_tool_strip_zoomrestore {
+            get {
+                return ResourceManager.GetString("form.tool_strip.zoomrestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap image_icon {
+            get {
+                object obj = ResourceManager.GetObject("image_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap link_icon {
+            get {
+                object obj = ResourceManager.GetObject("link_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -214,24 +343,42 @@ namespace funny_neko_giver.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Artist:
-        ///Author Page:
-        ///URL:.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static string result_search_empty {
+        internal static System.Drawing.Bitmap save_icon {
             get {
-                return ResourceManager.GetString("result_search.empty", resourceCulture);
+                object obj = ResourceManager.GetObject("save_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Artist: {0}
-        ///Author Page: {1}
-        ///URL: {2}.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static string result_search_filled {
+        internal static System.Drawing.Bitmap websearch_icon {
             get {
-                return ResourceManager.GetString("result_search.filled", resourceCulture);
+                object obj = ResourceManager.GetObject("websearch_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap zoomin_icon {
+            get {
+                object obj = ResourceManager.GetObject("zoomin_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap zoomout_icon {
+            get {
+                object obj = ResourceManager.GetObject("zoomout_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }
