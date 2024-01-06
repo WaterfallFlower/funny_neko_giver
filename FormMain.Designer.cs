@@ -178,7 +178,7 @@
             this.buttonDownloadAll.TabIndex = 5;
             this.buttonDownloadAll.Text = "Download All";
             this.buttonDownloadAll.UseVisualStyleBackColor = true;
-            this.buttonDownloadAll.Click += new System.EventHandler(this.buttonDownloadAll_Click);
+            this.buttonDownloadAll.Click += new System.EventHandler(this.OnButtonDownloadAllClick);
             // 
             // listFilesLoaded
             // 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -13,8 +14,9 @@ namespace funny_neko_giver
     {
         private readonly HttpClient _localHttpClient = new HttpClient();
         private IImageProviderApi _apiInstance;
-        private GifRenderLayer _gifPictures;
+        private bool _shouldBeDisposed;
         private int _percentZoom = 100;
+        private HashSet<string> _filesToRemove = new HashSet<string>();
 
         public FormMain()
         {
@@ -41,19 +43,14 @@ namespace funny_neko_giver
             groupBoxProgress.Text = Resources.progress_completed;
         }
 
-        private void SetZoomPercentage(int percent)
+        private void UpdateZoomPicture(int percent, bool load = true)
         {
-            var description = listFilesLoaded.SelectedItem as ResultImage;
-            // ReSharper disable once LocalizableElement
-            labelPercentage.Text = $"{percent}% ({(int)(percent * 0.01 * description.ImageItself.Width)}x{(int)(percent * 0.01 * description.ImageItself.Width)})";
             _percentZoom = percent;
-        }
-
-        private void UpdateZoomPicture()
-        {
             var description = listFilesLoaded.SelectedItem as ResultImage;
             if (_percentZoom == 100)
             {
+                labelPercentage.Text = $"{percent}% ({description.ImageItself.Width}x{description.ImageItself.Height})";
+                if (!load) return;
                 pictureBox.Image = description.ImageItself;
                 pictureBox.Invalidate();
                 return;
@@ -70,7 +67,40 @@ namespace funny_neko_giver
             }
 
             pictureBox.Image = zoomedImage;
+            labelPercentage.Text = $"{percent}% ({width}x{height})";
             pictureBox.Invalidate();
+        }
+
+        private void OnClearTempFolder(object sender, EventArgs eventArgs)
+        {
+            if (pictureBox.Image != null)
+            {
+                pictureBox.Image.Dispose();
+                pictureBox.Image = Resources.image_icon;
+            }
+            pictureBox.Invalidate();
+            listFilesLoaded.SelectedItem = null;
+            OnListBoxIndexChange(sender, eventArgs);
+            foreach (var items in listFilesLoaded.Items)
+            {
+                var image = items as ResultImage;
+                Console.WriteLine($"Disposing... {image}");
+                image.ImageItself.Dispose();
+            }
+            listFilesLoaded.Items.Clear();
+
+            foreach (var image in _filesToRemove)
+            {
+                try
+                {
+                    File.Delete(image);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error while removing file {image}!\n{ex}");
+                }
+            }
+            _filesToRemove.Clear();
         }
         
         private void CallNewApi()
@@ -111,6 +141,7 @@ namespace funny_neko_giver
             progressBar.Step = 1;
 
             /* Localization */
+            Text = @"Funny Neko Giver";
             groupBoxProgress.Text = Resources.progress_notasksrunning;
             groupBoxDescription.Text = Resources.form_file_description;
             groupBoxMain.Text = Resources.form_configure;
@@ -136,6 +167,8 @@ namespace funny_neko_giver
             listAvailableApi.Items.Add(new NekosBestApiProvider());
             listAvailableApi.Items.Add(new NekosFunApiProvider());
             listAvailableApi.SelectedIndex = 0;
+
+            Application.ApplicationExit += OnClearTempFolder;
         }
 
         private void OnLoadButtonClick(object sender, EventArgs e)
@@ -177,16 +210,29 @@ namespace funny_neko_giver
                 toolMenuImage.Enabled = actionButtonZoomIn.Enabled = actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = true;
                 var description = listFilesLoaded.SelectedItem as ResultImage;
                 textDescription.Text = description.FormattedDescription;
-                SetZoomPercentage(100); //Default value
+                if (_shouldBeDisposed)
+                {
+                    pictureBox.Image.Dispose();
+                    pictureBox.Image = Resources.image_icon;
+                    _shouldBeDisposed = false;
+                }
+                UpdateZoomPicture(100, false); //Default value
                 if (description.NeedAnimation)
                 {
-                    _gifPictures = new GifRenderLayer(pictureBox.Image);
-                    pictureBox.Image = _gifPictures.GetFrame(0);
+                    var uniqueTempFilePath = Path.Combine(Path.GetTempPath(), description.ImageName + ".gif");
+                    if (!File.Exists(uniqueTempFilePath))
+                    {
+                        description.ImageItself.Save(uniqueTempFilePath, ImageFormat.Gif);
+                        _filesToRemove.Add(uniqueTempFilePath);
+                    }
+                    pictureBox.Image = Image.FromFile(uniqueTempFilePath);
                     pictureBox.Invalidate();
+                    actionButtonZoomIn.Enabled = actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = false;
+                    _shouldBeDisposed = true;
                 }
                 else
                 {
-                    _gifPictures = null;
+                    actionButtonZoomIn.Enabled = actionButtonZoomOut.Enabled = actionButtonZoomRestore.Enabled = true;
                     pictureBox.Image = description.ImageItself;
                     pictureBox.Invalidate();
                 }
@@ -237,7 +283,11 @@ namespace funny_neko_giver
                 return;
             }
             var uniqueTempFilePath = Path.Combine(Path.GetTempPath(), image.ImageName + ".gif");
-            image.ImageItself.Save(uniqueTempFilePath, ImageFormat.Gif);
+            if (!File.Exists(uniqueTempFilePath))
+            {
+                image.ImageItself.Save(uniqueTempFilePath, ImageFormat.Gif);
+                _filesToRemove.Add(uniqueTempFilePath);
+            }
             Clipboard.SetFileDropList(new StringCollection { uniqueTempFilePath });
             Console.WriteLine(uniqueTempFilePath);
         }
@@ -245,21 +295,18 @@ namespace funny_neko_giver
         private void OnZoomInImage(object sender, EventArgs e)
         {
             if (_percentZoom >= 200) return;
-            SetZoomPercentage(_percentZoom + 10);
-            UpdateZoomPicture();
+            UpdateZoomPicture(_percentZoom + 10);
         }
 
         private void OnZoomOutImage(object sender, EventArgs e)
         {
             if (_percentZoom <= 10) return;
-            SetZoomPercentage(_percentZoom - 10);
-            UpdateZoomPicture();
+            UpdateZoomPicture(_percentZoom - 10);
         }
 
         private void OnZoomRestoreImage(object sender, EventArgs e)
         {
-            SetZoomPercentage(100);
-            UpdateZoomPicture();
+            UpdateZoomPicture(100);
         }
 
         private void OnCopyResizedImageClick(object sender, EventArgs e)
@@ -271,18 +318,15 @@ namespace funny_neko_giver
         {
             var k = MessageBox.Show(this, "Are you sure you want to delete everything?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (k != DialogResult.Yes) return;
-            foreach (var a in listFilesLoaded.Items)
-            {
-                ((ResultImage)a).ImageItself.Dispose();
-            }
+            OnClearTempFolder(sender, e);
             listFilesLoaded.Items.Clear();
             listFilesLoaded.SelectedItem = null;
             OnListBoxIndexChange(sender, e);
         }
 
-        private void buttonDownloadAll_Click(object sender, EventArgs e)
+        private void OnButtonDownloadAllClick(object sender, EventArgs e)
         {           
-            var k = MessageBox.Show(this, $"Are you sure you want to downlaod {listFilesLoaded.Items.Count} images?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var k = MessageBox.Show(this, $"Are you sure you want to downlaod {listFilesLoaded.Items.Count} files?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (k != DialogResult.Yes) return;
             foreach (var item in listFilesLoaded.Items)
             {
