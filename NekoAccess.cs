@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using funny_neko_giver.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -69,24 +70,25 @@ namespace funny_neko_giver
         )
         {
             var c = new CancellationTokenSource();
-            doProgress("Accessing API...");
+            doProgress(Resources.progress_connectapi);
             var message = await GetMessageAsync(c, $"https://nekos.best/api/v2/{category.Name}?amount={amount}");
             if (c.IsCancellationRequested)
             {
-                onError("Error while accessing API...");
+                onError(Resources.error_accessapi);
                 return;
             }
 
-            doProgress("Fetching results...");
-            var list_description = JsonConvert.DeserializeObject<ResultsFileDescription>(message);
-            int i = 1;
-            int k = list_description.Results.Count();
-            foreach (var description in list_description.Results)
+            doProgress(Resources.progress_fetching);
+            var listDescription = JsonConvert.DeserializeObject<ResultsFileDescription>(message);
+            var i = 1;
+            var k = listDescription.Results.Count();
+            foreach (var description in listDescription.Results)
             {
-                doProgress($"Downloading an image... {i}/{k}");
+                doProgress(string.Format(Resources.progress_downloadimage, i, k));
                 i++;
-                //Description Name
-                int idx = description.Url.LastIndexOf('/');
+                
+                /* Description Name */
+                var idx = description.Url.LastIndexOf('/');
                 description.DescriptionName =
                     idx != -1 ? description.Url.Substring(idx + 1).Split('.')[0] : description.Url;
 
@@ -100,7 +102,7 @@ namespace funny_neko_giver
                 }
                 else
                 {
-                    onError("Error while downloading image...");
+                    onError(Resources.error_downloadimage);
                 }
 
                 onSuccess(description);
@@ -119,7 +121,7 @@ namespace funny_neko_giver
             var message = await GetMessageAsync(c, "https://nekos.best/api/v2/endpoints");
             if (c.IsCancellationRequested)
             {
-                MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(message, Resources.dialog_messages_error, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
 

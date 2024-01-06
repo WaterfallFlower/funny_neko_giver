@@ -114,4 +114,66 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="dialog_messages.error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="result_search.filled" xml:space="preserve">
+    <value>Artist: {0}
+Author Page: {1}
+URL: {2}</value>
+  </data>
+  <data name="result_search.empty" xml:space="preserve">
+    <value>Artist:
+Author Page:
+URL:</value>
+  </data>
+  <data name="progress.completed" xml:space="preserve">
+    <value>Completed!</value>
+  </data>
+  <data name="progress.notasksrunning" xml:space="preserve">
+    <value>No tasks running...</value>
+  </data>
+  <data name="progress.connectapi" xml:space="preserve">
+    <value>Connecting to the API...</value>
+  </data>
+  <data name="progress.fetching" xml:space="preserve">
+    <value>Fetching results...</value>
+  </data>
+  <data name="error.category" xml:space="preserve">
+    <value>Please specify category!</value>
+  </data>
+  <data name="error.connectapi" xml:space="preserve">
+    <value>Failed to connect API!
+{0}</value>
+  </data>
+  <data name="error.downloadimage" xml:space="preserve">
+    <value>Error while downloading image...</value>
+  </data>
+  <data name="progress.downloadimage" xml:space="preserve">
+    <value>Downloading an image... {0}/{1}</value>
+  </data>
+  <data name="error.accessapi" xml:space="preserve">
+    <value>Error while accessing API...</value>
+  </data>
+  <data name="form.file_description" xml:space="preserve">
+    <value>File Description</value>
+  </data>
+  <data name="form.configure" xml:space="preserve">
+    <value>Configure</value>
+  </data>
+  <data name="form.button.load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="form.label.amount" xml:space="preserve">
+    <value>Amount:</value>
+  </data>
+  <data name="form.button.downloadall" xml:space="preserve">
+    <value>Downoad All</value>
+  </data>
+  <data name="form.button.deleteall" xml:space="preserve">
+    <value>Delete All</value>
+  </data>
+  <data name="form.tool_strip.main" xml:space="preserve">
+    <value>Main</value>
+  </data>
 </root>
