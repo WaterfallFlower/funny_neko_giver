@@ -12,7 +12,7 @@ using funny_neko_giver.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace funny_neko_giver
+namespace funny_neko_giver.ImageApi
 {
     internal class FileDescription
     {

@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Net.Http;
 using System.Windows.Forms;
+using funny_neko_giver.ImageApi;
 using funny_neko_giver.Properties;
 
 namespace funny_neko_giver

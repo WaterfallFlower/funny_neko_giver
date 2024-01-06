@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ using funny_neko_giver.Properties;
 using ImageMagick;
 using Newtonsoft.Json.Linq;
 
-namespace funny_neko_giver
+namespace funny_neko_giver.ImageApi
 {
     internal class ExtensiveCallResult
     {
@@ -96,7 +95,6 @@ namespace funny_neko_giver
             }
 
             doProgress(Resources.progress_fetching);
-            Console.WriteLine(JObject.Parse(message));
 
             var mainRequest = JObject.Parse(message);
 
@@ -131,11 +129,6 @@ namespace funny_neko_giver
             var k = callResults.Count();
             foreach (var description in callResults)
             {
-                foreach (PropertyInfo prop in description.GetType().GetProperties())
-                {
-                    Console.WriteLine(prop.Name.ToLower() + ": " + prop.GetValue(description));
-                }
-                
                 doProgress(string.Format(Resources.progress_downloadimage, i, k));
                 i++;
 

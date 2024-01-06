@@ -91,9 +91,9 @@
             <DependentUpon>FormMain.cs</DependentUpon>
         </Compile>
         <Compile Include="GeneralAccess.cs" />
-        <Compile Include="NekosApi.cs" />
-        <Compile Include="NekosBestApi.cs" />
-        <Compile Include="NekosFunApi.cs" />
+        <Compile Include="ImageApi\NekosApi.cs" />
+        <Compile Include="ImageApi\NekosBestApi.cs" />
+        <Compile Include="ImageApi\NekosFunApi.cs" />
         <Compile Include="Program.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <EmbeddedResource Include="FormMain.resx">

@@ -6,7 +6,7 @@ using System.Threading;
 using funny_neko_giver.Properties;
 using Newtonsoft.Json;
 
-namespace funny_neko_giver
+namespace funny_neko_giver.ImageApi
 {
     public class NekosFunApiProvider : ImageApiDescription
     {
