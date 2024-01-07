@@ -10,53 +10,68 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using funny_neko_giver.Properties;
 using ImageMagick;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace funny_neko_giver.ImageApi
 {
-    internal class ExtensiveCallResult
+    internal class UnpackedResponse
     {
-        public int Id { get; set; }
-        public string IdV2 { get; set; }
-        public string ImageUrl { get; set; }
-        public string SampleUrl { get; set; }
-        
-        public string Source { get; set; }
-        public string SourceId { get; set; }
-        public string Rating { get; set; }
-        public string Verification { get; set; }
-        public string HashMd5 { get; set; }
-        public string HashPerceptual { get; set; }
-        public bool IsOriginal { get; set; }
-        public bool IsScreenshot { get; set; }
-        public bool IsFlagged { get; set; }
-        public bool IsAnimated { get; set; }
-        public string Artist { get; set; }
-        
-        public decimal CreatedAt { get; set; }
-        public decimal UpdatedAt { get; set; }
+        [JsonProperty("id")] public int Id { get; set; }
+        [JsonProperty("id_v2")] public string IdV2 { get; set; }
+        [JsonProperty("image_url")] public string ImageUrl { get; set; }
+        [JsonProperty("sample_url")] public string SampleUrl { get; set; }
+        [JsonProperty("source")] public string Source { get; set; }
+        [JsonProperty("source_id")] public string SourceId { get; set; }
+        [JsonProperty("rating")] public string Rating { get; set; }
+        [JsonProperty("verification")] public string Verification { get; set; }
+        [JsonProperty("hash_md5")] public string HasMd5 { get; set; }
+        [JsonProperty("hash_perceptual")] public string HashPerceptual { get; set; }
+        [JsonProperty("is_original")] public bool IsOriginal { get; set; }
+        [JsonProperty("is_screenshot")] public bool IsScreenshot { get; set; }
+        [JsonProperty("is_flagged")] public bool IsFlagged { get; set; }
+        [JsonProperty("is_animated")] public bool IsAnimated { get; set; }
+        [JsonProperty("artist")] public ArtistInformation Artist { get; set; }
+        [JsonProperty("created_at")] public decimal CreatedAt { get; set; }
+        [JsonProperty("updated_at")] public decimal UpdatedAt { get; set; }
+    }
 
-        
+    internal class ArtistInformation
+    {
+        [JsonProperty("name")] public string Name { get; set; }
+        [JsonProperty("aliases")] public IEnumerable<string> Aliases { get; set; }
+        [JsonProperty("image_url")] public string ImageUrl { get; set; }
+        [JsonProperty("links")] public IEnumerable<string> Links { get; set; }
+        [JsonProperty("policy_repost")] public string PolicyRepost { get; set; }
+        [JsonProperty("policy_credit")] public bool PolicyCredit { get; set; }
+        [JsonProperty("policy_ai")] public bool PolicyAi { get; set; }
+
+
+        public override string ToString()
+        {
+            return "\n" + GeneralAccess.GetAllPropertiesList(this);
+        }
     }
     
-    public class NekosApiProvider : ImageApiDescription
+    public class NekosApiProvider : ApiDescription
     {
         public NekosApiProvider()
         {
             Name = "Nekos API (3.4.2)";
             UrlSimple = "https://nekosapi.com/";
         }
-        
+
         public override IImageProviderApi CreateInstance()
         {
             return new NekosApi();
         }
     }
-    
+
     public class NekosApi : IImageProviderApi
     {
         private IEnumerable<CategoryImage> _categoryList;
         private HttpClient _localHttpClient;
+
         public IEnumerable<CategoryImage> GetCategories()
         {
             return _categoryList;
@@ -79,22 +94,24 @@ namespace funny_neko_giver.ImageApi
 
         public async void LoadCategoryImage(
             CategoryImage category, int amount,
-            Action<string> onError, Action<ResultImage> onSuccess,
-            Action<string> doProgress, Action onFinal
-            )
+            Action<string> onError, Action<ResultImage> pushReadyImage,
+            Action<string> callProgressBar, Action onFinal
+        )
         {
-            var c = new CancellationTokenSource();
-            doProgress(Resources.progress_connectapi);
-            var message = await GeneralAccess.GetMessageAsync(c, _localHttpClient,
-                category.Name == "RANDOM" ? $"https://api.nekosapi.com/v3/images/random?limit={amount}" :
-                $"https://api.nekosapi.com/v3/images/tags/{category.Id}/images?limit={amount}");
-            if (c.IsCancellationRequested)
+            var token = new CancellationTokenSource();
+            callProgressBar(Resources.progress_connectapi);
+            var message = await GeneralAccess.GetMessageAsync(
+                token, _localHttpClient,
+                "https://api.nekosapi.com/v3/images/" +
+                (category.Type == "rnd" ? $"random?limit={amount}" : $"tags/{category.Id}/images?limit={amount}")
+            );
+            if (token.IsCancellationRequested)
             {
                 onError(Resources.error_accessapi);
                 return;
             }
 
-            doProgress(Resources.progress_fetching);
+            callProgressBar(Resources.progress_fetching);
 
             var mainRequest = JObject.Parse(message);
 
@@ -103,80 +120,54 @@ namespace funny_neko_giver.ImageApi
                 onError(Resources.error_emptycatalogue);
                 return;
             }
-            
+
             var callResults = mainRequest["items"].Select(o =>
-                new ExtensiveCallResult
-                {
-                    Id = o["id"].ToObject<int>(),
-                    IdV2 = o["id_v2"].ToObject<string>(),
-                    ImageUrl = o["image_url"].ToObject<string>(),
-                    SampleUrl = o["sample_url"].ToObject<string>(),
-                    Source = o["source"].ToObject<string>(),
-                    SourceId = o["source_id"].ToObject<string>(),
-                    Rating = o["rating"].ToObject<string>(),
-                    Verification = o["verification"].ToObject<string>(),
-                    HashMd5 = o["hash_md5"].ToObject<string>(),
-                    HashPerceptual = o["hash_perceptual"].ToObject<string>(),
-                    IsOriginal = o["is_original"].ToObject<bool>(),
-                    IsScreenshot = o["is_screenshot"].ToObject<bool>(),
-                    IsFlagged = o["is_flagged"].ToObject<bool>(),
-                    IsAnimated = o["is_animated"].ToObject<bool>(),
-                    Artist = BuildArtistString(o["artist"]),
-                    CreatedAt = o["created_at"].ToObject<decimal>(),
-                    UpdatedAt = o["updated_at"].ToObject<decimal>(),
-                });
+                JsonConvert.DeserializeObject<UnpackedResponse>(o.ToString())).ToArray();
             var i = 1;
-            var k = callResults.Count();
+            var k = callResults.Length;
             foreach (var description in callResults)
             {
-                doProgress(string.Format(Resources.progress_downloadimage, i, k));
-                i++;
+                callProgressBar(string.Format(Resources.progress_downloadimage, i++, k));
 
-                /* Description Name */
-                var idx = description.ImageUrl.LastIndexOf('/');
-                var imageName = idx != -1 ? description.ImageUrl.Substring(idx + 1).Split('.')[0] : description.ImageUrl;
-                Image imageItself = await DownloadScaryFormatImage(c, description.ImageUrl);
-
-                if (c.IsCancellationRequested)
+                var imageReady = await DownloadScaryFormatImage(token, description.ImageUrl);
+                
+                if (token.IsCancellationRequested)
                 {
                     onError(Resources.error_downloadimage);
                 }
+                
 
-                var builder = new StringBuilder();
-                foreach (var prop in description.GetType().GetProperties())
+                pushReadyImage(new ResultImage
                 {
-                    builder.Append(prop.Name.ToLower()).Append(": ").Append(prop.GetValue(description)).Append("\n");
-                }
-
-                onSuccess(new ResultImage
-                {
-                    ImageName = imageName,
-                    ImageItself = imageItself,
+                    ImageName = GeneralAccess.GetNameFromImageUrl(description.ImageUrl),
+                    ImageItself = imageReady,
                     SourceUrl = description.ImageUrl,
                     NeedAnimation = description.ImageUrl.EndsWith(".gif"),
-                    FormattedDescription = builder.ToString()
+                    FormattedDescription = GeneralAccess.GetAllPropertiesList(description)
                 });
             }
 
             onFinal();
         }
-        
+
         private async Task<IEnumerable<CategoryImage>> BuildCategoryList(CancellationTokenSource c)
         {
-            var message =
-                await GeneralAccess.GetMessageAsync(c, _localHttpClient, "https://api.nekosapi.com/v3/images/tags");
+            var message = await GeneralAccess.GetMessageAsync(c, _localHttpClient, "https://api.nekosapi.com/v3/images/tags");
             if (c.IsCancellationRequested)
             {
                 MessageBox.Show(message, Resources.dialog_messages_error, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
 
-            var images = new List<CategoryImage> { new CategoryImage {Name = "RANDOM"} };
+            var images = new List<CategoryImage> { new CategoryImage { Name = "Random Category", Type = "rnd" } };
             images.AddRange(JObject.Parse(message)["items"].Select(v => new CategoryImage
-                { Name = v["name"].ToObject<string>(), Type = v["sub"].ToObject<string>(), IsSafe = !v["is_nsfw"].ToObject<bool>(), Id = v["id"].ToObject<int>()}));
+            {
+                Name = v["name"].ToObject<string>(), Type = v["sub"].ToObject<string>(),
+                IsSafe = !v["is_nsfw"].ToObject<bool>(), Id = v["id"].ToObject<int>()
+            }));
             return images;
         }
-        
+
         private async Task<Image> DownloadScaryFormatImage(CancellationTokenSource c, string url)
         {
             byte[] buffer;
@@ -192,41 +183,15 @@ namespace funny_neko_giver.ImageApi
             }
 
             Bitmap bitmap;
-            using (var magickImages = new MagickImageCollection(buffer)) {
+            using (var magickImages = new MagickImageCollection(buffer))
+            {
                 var ms = new MemoryStream();
                 await magickImages.WriteAsync(ms, magickImages.Count > 1 ? MagickFormat.Gif : MagickFormat.Png);
                 bitmap = new Bitmap(ms);
                 bitmap.Tag = ms;
             }
+
             return bitmap;
-        }
-
-        private static string BuildArtistString(JToken artist)
-        {
-            if (!artist.HasValues)
-            {
-                return null;
-            }
-            
-            var builder = new StringBuilder();
-            builder.Append("Artist Name: ").Append(artist["name"].ToObject<string>()).Append("\n");
-            builder.Append("Artist Aliases:\n");
-            foreach (var obj1 in artist["aliases"].Children())
-            {
-                builder.Append(obj1.ToObject<string>()).Append("\n");
-            }
-
-            builder.Append("Image Original URL: ").Append(artist["image_url"].ToObject<string>()).Append("\n");
-            builder.Append("Links:\n");
-            foreach (var obj1 in artist["links"].Children())
-            {
-                builder.Append(obj1.ToObject<string>()).Append("\n");
-            }
-
-            builder.Append("Policy Repost: ").Append(artist["policy_repost"].ToObject<string>()).Append("\n");
-            builder.Append("Policy Credit: ").Append(artist["policy_credit"].ToObject<bool>()).Append("\n");
-            builder.Append("Policy AI: ").Append(artist["policy_ai"].ToObject<bool>()).Append("\n");
-            return builder.ToString();
         }
     }
 }

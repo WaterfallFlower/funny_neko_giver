@@ -166,6 +166,7 @@
             // textDescription
             // 
             this.textDescription.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textDescription.Font = new System.Drawing.Font("Calibri", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textDescription.Location = new System.Drawing.Point(3, 16);
             this.textDescription.Name = "textDescription";
             this.textDescription.ReadOnly = true;

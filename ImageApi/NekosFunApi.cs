@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using funny_neko_giver.Properties;
@@ -8,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace funny_neko_giver.ImageApi
 {
-    public class NekosFunApiProvider : ImageApiDescription
+    public class NekosFunApiProvider : ApiDescription
     {
         public NekosFunApiProvider()
         {
@@ -22,7 +23,7 @@ namespace funny_neko_giver.ImageApi
         }
     }
 
-    internal class BindedImageResult
+    internal class JsonImageResult
     {
         public string Image { get; set; }
     }
@@ -32,6 +33,7 @@ namespace funny_neko_giver.ImageApi
         /* Well, the tags list is offline. */
         private static readonly IEnumerable<CategoryImage> LocalCategories = new[]
         {
+            new CategoryImage { Name = "Random Category", Type = "rnd" },
             new CategoryImage { Name = "kiss" },
             new CategoryImage { Name = "lick" },
             new CategoryImage { Name = "hug" },
@@ -71,58 +73,62 @@ namespace funny_neko_giver.ImageApi
         {
             _localHttpClient = client;
             onSuccess(this);
-            //Nothing really to prepare tbh...
         }
 
         public async void LoadCategoryImage(
             CategoryImage category, int amount,
-            Action<string> onError, Action<ResultImage> onSuccess,
-            Action<string> doProgress, Action onFinal)
+            Action<string> onError, Action<ResultImage> pushReadyImage,
+            Action<string> callProgressBar, Action onFinal)
         {
-            for (int i = 0; i < amount; i++)
+            for (var i = 0; i < amount; i++)
             {
-                var cancellationToken = new CancellationTokenSource();
-                doProgress(Resources.progress_connectapi);
-                var message = await GeneralAccess.GetMessageAsync(cancellationToken, _localHttpClient,
-                    $"http://api.nekos.fun:8080/api/{category.Name}");
-                if (cancellationToken.IsCancellationRequested)
+                var token = new CancellationTokenSource();
+                callProgressBar(Resources.progress_connectapi);
+
+                var categoryLoad = category.Name;
+                
+                if (category.Type == "rnd")
+                {
+                    var rnd = new Random();
+                    categoryLoad = LocalCategories.ElementAt(rnd.Next(1, LocalCategories.Count() - 1)).Name;
+                }
+                
+                var message = await GeneralAccess.GetMessageAsync(token, _localHttpClient,$"http://api.nekos.fun:8080/api/{categoryLoad}");
+                if (token.IsCancellationRequested)
                 {
                     onError(Resources.error_accessapi);
                     continue;
                 }
 
-                doProgress(Resources.progress_fetching);
-                var listDescription = JsonConvert.DeserializeObject<BindedImageResult>(message);
-                doProgress(string.Format(Resources.progress_downloadimage, i, amount));
+                callProgressBar(Resources.progress_fetching);
+                var content = JsonConvert.DeserializeObject<JsonImageResult>(message);
+                callProgressBar(string.Format(Resources.progress_downloadimage, i, amount));
 
-                /* Description Name */
-                var idx = listDescription.Image.LastIndexOf('/');
-                var imageName = idx != -1
-                    ? listDescription.Image.Substring(idx + 1).Split('.')[0]
-                    : listDescription.Image;
-                Image imageItself = null;
-
-                var response = await _localHttpClient.GetAsync(listDescription.Image);
-                if (response.IsSuccessStatusCode)
+                Image image;
+                var response = await _localHttpClient.GetAsync(content.Image, token.Token);
+                
+                if (response.IsSuccessStatusCode && !token.IsCancellationRequested)
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
-                        imageItself = Image.FromStream(stream);
+                        image = Image.FromStream(stream);
+                        stream.Dispose();
                         stream.Close();
                     }
                 }
                 else
                 {
                     onError(Resources.error_downloadimage);
+                    continue;
                 }
 
-                onSuccess(new ResultImage
+                pushReadyImage(new ResultImage
                 {
-                    ImageName = imageName,
-                    ImageItself = imageItself,
-                    SourceUrl = listDescription.Image,
-                    NeedAnimation = listDescription.Image.EndsWith(".gif"),
-                    FormattedDescription = listDescription.Image
+                    ImageName = GeneralAccess.GetNameFromImageUrl(content.Image),
+                    ImageItself = image,
+                    SourceUrl = content.Image,
+                    NeedAnimation = content.Image.EndsWith(".gif"),
+                    FormattedDescription = content.Image
                 });
             }
 

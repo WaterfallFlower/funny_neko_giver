@@ -113,7 +113,7 @@ namespace funny_neko_giver
         {
             listCategory.Items.Clear();
 
-            var access1 = listAvailableApi.SelectedItem as ImageApiDescription;
+            var access1 = listAvailableApi.SelectedItem as ApiDescription;
 
             buttonLoad.Enabled = listCategory.Enabled = false;
             _apiInstance = access1.CreateInstance();
@@ -358,7 +358,7 @@ namespace funny_neko_giver
         private void OnButtonLinkApiClick(object sender, EventArgs e)
         {
             if (listAvailableApi.SelectedItem == null) return;
-            var apiGet = listAvailableApi.SelectedItem as ImageApiDescription;
+            var apiGet = listAvailableApi.SelectedItem as ApiDescription;
             Process.Start(new ProcessStartInfo(apiGet.UrlSimple) { UseShellExecute = true });
         }
     }

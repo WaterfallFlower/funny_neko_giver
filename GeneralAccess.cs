@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -17,7 +18,7 @@ namespace funny_neko_giver
 
         public override string ToString()
         {
-            if (Name == "RANDOM")
+            if (Type == "rnd")
             {
                 return Name;
             }
@@ -46,7 +47,7 @@ namespace funny_neko_giver
         }
     }
 
-    public abstract class ImageApiDescription
+    public abstract class ApiDescription
     {
         public string Name { get; set; }
         public string UrlSimple { get; set; }
@@ -67,25 +68,44 @@ namespace funny_neko_giver
 
         void LoadCategoryImage(
             CategoryImage category, int amount,
-            Action<string> onError, Action<ResultImage> onSuccess,
-            Action<string> doProgress, Action onFinal
+            Action<string> onError, Action<ResultImage> pushReadyImage,
+            Action<string> callProgressBar, Action onFinal
         );
     }
 
-    public class GeneralAccess
+    public static class GeneralAccess
     {
-        public static async Task<string> GetMessageAsync(
-            CancellationTokenSource c, HttpClient _localHttpClient,string uri
-            )
+        public static string GetNameFromImageUrl(string s)
         {
-            var response = await _localHttpClient.GetAsync(uri);
+            var idx = s.LastIndexOf('/');
+            return idx != -1? s.Substring(idx + 1).Split('.')[0]: s;
+        }
+
+        public static async Task<string> GetMessageAsync(CancellationTokenSource token, HttpClient client, string uri)
+        {
+            var response = await client.GetAsync(uri);
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadAsStringAsync();
             }
-
-            c?.Cancel();
+            token?.Cancel();
             return $"Error accessing: {response.ReasonPhrase}";
+        }
+
+        public static string GetAllPropertiesList<T>(T tObject)
+        {
+            var builder = new StringBuilder();
+            foreach (var prop in tObject.GetType().GetProperties())
+            {
+                var value = prop.GetValue(tObject);
+                if (value is IEnumerable<object> objects)
+                {
+                    value = $"[{string.Join(", ", objects.ToArray() )}]";
+                }
+                
+                builder.Append(prop.Name.ToLower()).Append(": ").Append(value ?? "[N/A]").Append("\n\n");
+            }
+            return builder.ToString();
         }
     }
 }

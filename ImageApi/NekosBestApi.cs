@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -23,12 +21,12 @@ namespace funny_neko_giver.ImageApi
         [JsonProperty("url")] public string Url { get; set; }
     }
 
-    internal class ResultsFileDescription
+    internal class ResponseResultList
     {
         [JsonProperty("results")] public IEnumerable<FileDescription> Results;
     }
 
-    public class NekosBestApiProvider : ImageApiDescription
+    public class NekosBestApiProvider : ApiDescription
     {
         public NekosBestApiProvider()
         {
@@ -50,9 +48,9 @@ namespace funny_neko_giver.ImageApi
         public async void Init(HttpClient client, Action<string> onError, Action<IImageProviderApi> onSuccess)
         {
             _localHttpClient = client;
-            var cancelOperation = new CancellationTokenSource();
-            _categoryList = await BuildCategoryList(cancelOperation);
-            if (cancelOperation.IsCancellationRequested)
+            var token = new CancellationTokenSource();
+            _categoryList = await BuildCategoryList(token);
+            if (token.IsCancellationRequested)
             {
                 onError(null); //TODO: Remove this
             }
@@ -64,66 +62,55 @@ namespace funny_neko_giver.ImageApi
 
         public async void LoadCategoryImage(
             CategoryImage category, int amount,
-            Action<string> onError, Action<ResultImage> onSuccess,
-            Action<string> doProgress, Action onFinal
+            Action<string> onError, Action<ResultImage> pushReadyImage,
+            Action<string> callProgressBar, Action onFinal
         )
         {
-            var c = new CancellationTokenSource();
-            doProgress(Resources.progress_connectapi);
-            var message = await GeneralAccess.GetMessageAsync(c, _localHttpClient,
+            var token = new CancellationTokenSource();
+            callProgressBar(Resources.progress_connectapi);
+            var message = await GeneralAccess.GetMessageAsync(token, _localHttpClient,
                 $"https://nekos.best/api/v2/{category.Name}?amount={amount}");
-            if (c.IsCancellationRequested)
+            if (token.IsCancellationRequested)
             {
                 onError(Resources.error_accessapi);
                 return;
             }
 
-            doProgress(Resources.progress_fetching);
-            var listDescription = JsonConvert.DeserializeObject<ResultsFileDescription>(message);
+            callProgressBar(Resources.progress_fetching);
+            var listResults = JsonConvert.DeserializeObject<ResponseResultList>(message);
+            
             var i = 1;
-            var k = listDescription.Results.Count();
-            foreach (var description in listDescription.Results)
+            var k = listResults.Results.Count();
+            
+            foreach (var description in listResults.Results)
             {
-                doProgress(string.Format(Resources.progress_downloadimage, i, k));
-                i++;
+                callProgressBar(string.Format(Resources.progress_downloadimage, i++, k));
 
-                /* Description Name */
-                var idx = description.Url.LastIndexOf('/');
-                var imageName = idx != -1 ? description.Url.Substring(idx + 1).Split('.')[0] : description.Url;
-                Image imageItself = null;
-
+                Image image;
                 var response = await _localHttpClient.GetAsync(description.Url);
+                
                 if (response.IsSuccessStatusCode)
                 {
-                    var imageData = await response.Content.ReadAsByteArrayAsync();
-                    using (var stream = new MemoryStream(imageData))
+                    using (var stream = await response.Content.ReadAsStreamAsync())
                     {
-                        imageItself = Image.FromStream(stream);
+                        image = Image.FromStream(stream);
+                        stream.Dispose();
+                        stream.Close();
                     }
                 }
                 else
                 {
                     onError(Resources.error_downloadimage);
+                    continue;
                 }
-
-                var builder = new StringBuilder();
-                if (!string.IsNullOrEmpty(description.AnimeName))
-                    builder.Append("Anime Name: ").Append(description.AnimeName).Append("\n");
-                if (!string.IsNullOrEmpty(description.ArtistName))
-                    builder.Append("Author: ").Append(description.ArtistName).Append("\n");
-                if (!string.IsNullOrEmpty(description.ArtistHref))
-                    builder.Append("Author URL: ").Append(description.ArtistHref).Append("\n");
-                if (!string.IsNullOrEmpty(description.SourceUrl))
-                    builder.Append("Source URL: ").Append(description.ArtistHref).Append("\n");
-
-
-                onSuccess(new ResultImage
+                
+                pushReadyImage(new ResultImage
                 {
-                    ImageName = imageName,
-                    ImageItself = imageItself,
+                    ImageName = GeneralAccess.GetNameFromImageUrl(description.Url),
+                    ImageItself = image,
                     SourceUrl = description.Url,
                     NeedAnimation = description.Url.EndsWith(".gif"),
-                    FormattedDescription = builder.ToString()
+                    FormattedDescription = GeneralAccess.GetAllPropertiesList(description)
                 });
             }
 
